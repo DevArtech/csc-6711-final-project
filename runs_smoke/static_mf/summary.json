@@ -1,0 +1,5 @@
+{
+  "checkpoint": "recsys/runs_smoke/static_mf/static_mf.pt",
+  "epochs": 2,
+  "num_train_rows": 36
+}

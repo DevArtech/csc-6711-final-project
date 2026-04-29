@@ -1,0 +1,5 @@
+{
+  "checkpoint": "recsys/runs_smoke/sequential/sequential.pt",
+  "num_examples": 24,
+  "epochs": 2
+}

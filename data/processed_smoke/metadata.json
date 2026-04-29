@@ -1,0 +1,10 @@
+{
+  "global_mean_rating": 3.4,
+  "min_interactions_filter": 5,
+  "num_interactions": 60,
+  "num_items": 12,
+  "num_users": 6,
+  "stream_interactions": 18,
+  "test_interactions": 6,
+  "warm_interactions": 36
+}

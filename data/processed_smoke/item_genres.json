@@ -1,0 +1,76 @@
+{
+  "genre_names": [
+    "Action",
+    "Adventure",
+    "Animation",
+    "Children's",
+    "Comedy",
+    "Documentary",
+    "Drama",
+    "Fantasy",
+    "Horror",
+    "Romance",
+    "Sci-Fi",
+    "Thriller"
+  ],
+  "genre_to_id": {
+    "Action": 0,
+    "Adventure": 1,
+    "Animation": 2,
+    "Children's": 3,
+    "Comedy": 4,
+    "Documentary": 5,
+    "Drama": 6,
+    "Fantasy": 7,
+    "Horror": 8,
+    "Romance": 9,
+    "Sci-Fi": 10,
+    "Thriller": 11
+  },
+  "item_to_genres": {
+    "0": [
+      0,
+      11
+    ],
+    "1": [
+      0,
+      10
+    ],
+    "2": [
+      6,
+      9
+    ],
+    "3": [
+      4
+    ],
+    "4": [
+      5
+    ],
+    "5": [
+      6,
+      11
+    ],
+    "6": [
+      2,
+      3
+    ],
+    "7": [
+      1,
+      7
+    ],
+    "8": [
+      4,
+      9
+    ],
+    "9": [
+      8
+    ],
+    "10": [
+      10,
+      1
+    ],
+    "11": [
+      6
+    ]
+  }
+}

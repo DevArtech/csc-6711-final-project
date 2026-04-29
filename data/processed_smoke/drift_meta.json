@@ -1,0 +1,21 @@
+{
+  "actual_drift_users": [
+    0,
+    3,
+    4,
+    5
+  ],
+  "output_csv": "recsys/data/processed_smoke/interactions_drift.csv",
+  "requested_users": 4,
+  "seed": 7,
+  "swap_pairs": [
+    [
+      0,
+      3
+    ],
+    [
+      5,
+      4
+    ]
+  ]
+}

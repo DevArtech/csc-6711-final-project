@@ -1,0 +1,5 @@
+{
+  "checkpoint": "recsys/runs_smoke/bayesian_mf/bayesian_mf.pt",
+  "num_warm_rows": 36,
+  "warm_epochs": 2
+}
