@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass
-from typing import Protocol
+from dataclasses import dataclass, field
+from typing import Callable, Protocol
 
 import torch
 
@@ -19,6 +19,8 @@ class RankingSummary:
     rmse: float
     mae: float
     count: int
+    brier: float = field(default=0.0)
+    ece: float = field(default=0.0)
 
 
 class RecommenderRuntime(Protocol):
@@ -59,6 +61,7 @@ def evaluate_ranking_and_rating(
     ks: tuple[int, ...] = (5, 10, 20),
     n_negatives: int = 100,
     seed: int = 0,
+    uncertainty_fn: Callable[[int, int], tuple[float, float]] | None = None,
 ) -> RankingSummary:
     rng = random.Random(seed)
     hits = {k: 0.0 for k in ks}
@@ -69,6 +72,9 @@ def evaluate_ranking_and_rating(
     sq_error = 0.0
     abs_error = 0.0
     count = 0
+
+    bucket_probs: list[list[float]] = []
+    true_buckets: list[int] = []
 
     for row in test_rows:
         positives = row.item_id
@@ -96,7 +102,13 @@ def evaluate_ranking_and_rating(
         abs_error += abs(err)
         count += 1
 
+        if uncertainty_fn is not None:
+            mean, var = uncertainty_fn(row.user_id, row.item_id)
+            bucket_probs.append(rating_bucket_probs_from_gaussian(mean, var))
+            true_buckets.append(max(0, min(4, int(round(row.rating)) - 1)))
+
     denom = max(1, count)
+    cal = brier_and_ece_from_probabilities(bucket_probs, true_buckets) if bucket_probs else {"brier": 0.0, "ece": 0.0}
     return RankingSummary(
         hr={k: hits[k] / denom for k in ks},
         ndcg={k: ndcgs[k] / denom for k in ks},
@@ -105,6 +117,8 @@ def evaluate_ranking_and_rating(
         rmse=math.sqrt(sq_error / denom),
         mae=abs_error / denom,
         count=count,
+        brier=cal["brier"],
+        ece=cal["ece"],
     )
 
 

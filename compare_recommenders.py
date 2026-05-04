@@ -223,6 +223,7 @@ def main() -> None:
         seen = defaultdict(set, {u: set(items) for u, items in base_seen_by_user.items()})
         for row in stream_rows:
             seen[row.user_id].add(row.item_id)
+        uncertainty_fn = getattr(runtime, "predict_rating_with_uncertainty", None)
         result = evaluate_ranking_and_rating(
             runtime=runtime,
             test_rows=test_rows,
@@ -231,6 +232,7 @@ def main() -> None:
             ks=(5, 10, 20),
             n_negatives=args.n_negatives,
             seed=args.seed + 777 + idx,
+            uncertainty_fn=uncertainty_fn,
         )
         summary[name] = {
             "hr@5": result.hr[5],
@@ -244,10 +246,13 @@ def main() -> None:
             "rmse": result.rmse,
             "mae": result.mae,
             "count": float(result.count),
+            "brier": result.brier,
+            "ece": result.ece,
         }
         print(
             f"[compare] final summary model={name} hr10={summary[name]['hr@10']:.4f} "
-            f"ndcg10={summary[name]['ndcg@10']:.4f} rmse={summary[name]['rmse']:.4f}",
+            f"ndcg10={summary[name]['ndcg@10']:.4f} rmse={summary[name]['rmse']:.4f}"
+            + (f" brier={result.brier:.4f} ece={result.ece:.4f}" if uncertainty_fn else ""),
             flush=True,
         )
 
@@ -264,6 +269,7 @@ def main() -> None:
             seen = defaultdict(set, {u: set(items) for u, items in base_seen_by_user.items()})
             for row in stream_rows:
                 seen[row.user_id].add(row.item_id)
+            uncertainty_fn = getattr(runtime, "predict_rating_with_uncertainty", None)
             result = evaluate_ranking_and_rating(
                 runtime=runtime,
                 test_rows=drift_test_rows,
@@ -272,6 +278,7 @@ def main() -> None:
                 ks=(5, 10, 20),
                 n_negatives=args.n_negatives,
                 seed=args.seed + 991 + idx,
+                uncertainty_fn=uncertainty_fn,
             )
             drift_summary[name] = {
                 "hr@10": result.hr[10],
@@ -279,10 +286,13 @@ def main() -> None:
                 "rmse": result.rmse,
                 "mae": result.mae,
                 "count": float(result.count),
+                "brier": result.brier,
+                "ece": result.ece,
             }
             print(
                 f"[compare] drift summary model={name} hr10={drift_summary[name]['hr@10']:.4f} "
-                f"ndcg10={drift_summary[name]['ndcg@10']:.4f}",
+                f"ndcg10={drift_summary[name]['ndcg@10']:.4f}"
+                + (f" brier={result.brier:.4f} ece={result.ece:.4f}" if uncertainty_fn else ""),
                 flush=True,
             )
     else:
