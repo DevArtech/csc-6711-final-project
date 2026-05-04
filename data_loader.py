@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import random
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -88,6 +89,32 @@ class MFTrainDataset(Dataset[tuple[torch.Tensor, torch.Tensor, torch.Tensor]]):
             torch.tensor(row.user_id, dtype=torch.long),
             torch.tensor(row.item_id, dtype=torch.long),
             torch.tensor(row.rating, dtype=torch.float32),
+        )
+
+
+class BPRTrainDataset(Dataset[tuple[torch.Tensor, torch.Tensor, torch.Tensor]]):
+    """Yields (user, pos_item, neg_item) triplets for BPR loss training."""
+
+    def __init__(self, interactions: list[Interaction], num_items: int) -> None:
+        self.rows = interactions
+        self.num_items = num_items
+        self.user_positives: dict[int, set[int]] = defaultdict(set)
+        for row in interactions:
+            self.user_positives[row.user_id].add(row.item_id)
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        row = self.rows[idx]
+        pos_set = self.user_positives[row.user_id]
+        neg = random.randint(0, self.num_items - 1)
+        while neg in pos_set:
+            neg = random.randint(0, self.num_items - 1)
+        return (
+            torch.tensor(row.user_id, dtype=torch.long),
+            torch.tensor(row.item_id, dtype=torch.long),
+            torch.tensor(neg, dtype=torch.long),
         )
 
 

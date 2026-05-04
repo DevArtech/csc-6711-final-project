@@ -166,6 +166,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-every", type=int, default=20000)
     parser.add_argument("--n-negatives", type=int, default=100)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--models", type=str, default=None,
+        help="Comma-separated subset of models to evaluate, e.g. 'bayesian_mf' or 'static_mf,bayesian_mf'. "
+             "Defaults to all three.",
+    )
     return parser.parse_args()
 
 
@@ -184,11 +189,14 @@ def main() -> None:
     for row in warm_rows:
         base_seen_by_user[row.user_id].add(row.item_id)
 
-    runtimes = {
-        "static_mf": StaticRuntime(args.static_checkpoint),
-        "sequential": SequentialRuntime(args.sequential_checkpoint, warm_rows=warm_rows),
-        "bayesian_mf": BayesianRuntime(args.bayesian_checkpoint),
+    enabled = {m.strip() for m in args.models.split(",")} if args.models else {"static_mf", "sequential", "bayesian_mf"}
+    all_runtimes = {
+        "static_mf":   lambda: StaticRuntime(args.static_checkpoint),
+        "sequential":  lambda: SequentialRuntime(args.sequential_checkpoint, warm_rows=warm_rows),
+        "bayesian_mf": lambda: BayesianRuntime(args.bayesian_checkpoint),
     }
+    runtimes = {name: factory() for name, factory in all_runtimes.items() if name in enabled}
+    print(f"[compare] evaluating models: {list(runtimes.keys())}", flush=True)
     print(
         f"[compare] loaded data: warm={len(warm_rows)} stream={len(stream_rows)} test={len(test_rows)} "
         f"num_items={metadata['num_items']}",

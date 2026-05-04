@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=recsys_sequential
-#SBATCH --partition=teaching
-#SBATCH --gres=gpu:1
+#SBATCH --partition=dgx
+#SBATCH --gres=gpu:v100:1
 #SBATCH --cpus-per-gpu=8
 #SBATCH --mem=64G
 #SBATCH --time=1-00:00:00
@@ -9,6 +9,7 @@
 #SBATCH --error=recsys/runs/sequential/recsys_sequential_%j.err
 
 set -euo pipefail
+export PYTHONNOUSERSITE=1
 
 ENV=${ENV:-/data/csc4611/conda-csc4611}
 PYTHON_BIN="$ENV/bin/python"
